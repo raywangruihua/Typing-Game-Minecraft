@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing game</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.jpg">
+</head>
+<body>
+    <header>
+        <div>
+            <h1>Typing game!</h1>
+            <div class="tilt">
+                <div id="status" class="pop">Awesome!</div>
+            </div>
+        </div>
+        <p>Inspired by Minecraft</p>
+    </header>
+    <main>
+        <p>Practice your typing skills with a quote from the Minecraft end poem.</p>
+        <p>Click **start** to begin!</p>
+        <p id="quote"></p>
+        <p id="message"></p>
+        <dialog id="dialog" aria-label="success dialog">
+            <form method="dialog">
+                <p id="success" aria-label="success message"></p>
+                <input type="text" id="name" required />
+                <button type="button" id="submit">Submit Score</button>
+            </form>
+        </dialog>
+        <div>
+            <input type="text" aria-label="current word" id="typed-value" disabled />
+            <button type="button" id="start">Start</button>
+        </div>
+    </main>
+    <script src="script.mjs"></script>
+</body>
+</html>

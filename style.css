@@ -1,0 +1,94 @@
+/* Fonts */
+@font-face { 
+    font-family: "Minecraft"; 
+    src: 
+        url("fonts/minecraft.woff") format("woff"), 
+        url("fonts/minecraft.woff2") format("woff2");
+}
+
+/* General */
+
+header {
+    text-align: center;
+}
+
+body {
+    font-family: "Minecraft";
+    color: #ffffff;
+    background-image: url("images/grass-background.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+main {
+    text-align: center;
+}
+
+input, textarea, button, select {
+    font-family: inherit;
+}
+
+/* Effects */
+.pop {
+    animation: pop 0.58s infinite;
+    -webkit-animation: pop 0.58s infinite;
+}
+
+.tilt {
+    -ms-transform: rotate(-25deg);
+    -webkit-transform: rotate(-25deg);
+    transform: rotate(-25deg);
+}
+
+.highlight {
+    background-color: yellow;
+    color: #000000;
+}
+
+.error {
+    background-color: lightcoral;
+    border: red;
+}
+
+/* Specific elements */
+
+#status {
+    color: #FFFF00;
+    text-shadow:3px 3px #3F3F00;
+    position: absolute;
+    left: 200px;
+    top: 10px;
+    z-index: 1;
+}
+
+/* Keyframes */
+@keyframes pop {
+    from {
+        transform:scale(0.95)
+    }
+    50% {
+        transform:scale(1)
+    }
+    to {
+        transform:scale(0.95)
+    }
+}
+
+@-webkit-keyframes pop {
+    from {
+        -webkit-transform:scale(0.95)
+    }
+    50% {
+        -webkit-transform:scale(1)
+    }
+    to {
+        -webkit-transform:scale(0.95)
+    }
+}
