@@ -87,8 +87,6 @@ async function init() {
             dialogElement.open = false;
         });
 
-
-
         async function submitScore() {
             let name = localStorage.getItem("name");
             let wpm = numWords / (elapsedTime / 60);
@@ -97,6 +95,8 @@ async function init() {
                 headers: { "Content-Type": "application/json"},
                 body: JSON.stringify({ name, wpm, elapsedTime })
             });
+            const text = await res.text();
+            console.log("submitScore status:", res.status, "body:", text);
             if (!result.ok) throw new Error("Score submit failed");
 
             loadLeaderboard();
