@@ -1,45 +1,30 @@
-async function readQuotes(url) {
-    const result = await fetch(url);
-    if (!result.ok) throw new Error(`Failed to fetch ${url}: ${result.status}`);
-
-    const text = await result.text();
-    return text.split(/\r?\n/);
-}
+const workersDomain = "typing-game-leaderboard-worker.raywangruihua.workers.dev";
 
 async function init() {
-    const workersDomain = "typing-game-leaderboard-worker.raywangruihua.workers.dev";
-    const quotes = await readQuotes("./text/quotes/minecraft-end-poem.txt");
+    const quotes = await readTextfile("text/quotes/minecraft-end-poem.txt");
     let words = [];
-    let num;
+    let numWords = 0;
     let wordIndex = 0;
     let startTime = Date.now();
 
+    let statusElement = document.getElementById("status");
     const quoteElement = document.getElementById("quote");
     const messageElement = document.getElementById("message");
-    const nameElement = document.getElementById("name");
+    let nameElement = document.getElementById("name");
     const dialogElement = document.getElementById("dialog");
     const typedValueElement = document.getElementById("typed-value");
 
+    statusElement.innerHTML = await randomStatus();
+    nameElement.value = localStorage.getItem("name");
+
     loadLeaderboard();
+
     document.getElementById("start").addEventListener("click", startGame);
 
-    async function loadLeaderboard() {
-        const res = await fetch(`https://${workersDomain}/leaderboard?limit=10`);
-        if (!res.ok) throw new Error("Failed to load leaderboard");
-        const scores = await res.json();
-
-        renderLeaderboard(scores);
-    }
-
-    function renderLeaderboard(scores) {
-        const ol = document.getElementById("leaderboard");
-        ol.innerHTML = "";
-
-        for (const s of scores) {
-            const li = document.createElement("li");
-            li.textContent = `${s.name} | WPM: ${s.wpm} | Time: ${s.elapsedTime}`;
-            ol.appendChild(li);
-        }
+    async function randomStatus() {
+        const statusIndex = Math.floor(Math.random() * 373);
+        const statuses = await readTextfile("text/splash/splashes.txt");
+        return statuses[statusIndex];
     }
 
     function startGame() {
@@ -47,7 +32,7 @@ async function init() {
         const quote = quotes[quoteIndex];
 
         words = quote.split(" ");
-        num = words.length;
+        numWords = words.length;
         wordIndex = 0;
 
         const spanWords = words.map(function(word) { return `<span>${word} </span>`});
@@ -57,54 +42,92 @@ async function init() {
 
         typedValueElement.value = "";
         typedValueElement.disabled = false;
-        typedValueElement.addEventListener("input", handleTyping);
+        typedValueElement.addEventListener("input", handleType);
         typedValueElement.focus();
 
         startTime = new Date().getTime();
     }
 
-    function handleTyping() {
+    function handleType() {
         const currentWord = words[wordIndex];
         const typedValue = typedValueElement.value;
 
         if (typedValue === currentWord && wordIndex === words.length - 1) {
-            const elapsedTime = (new Date().getTime() - startTime) / 1000;
-            document.getElementById("success").innerText = `CONGRATULATIONS! You finished in ${elapsedTime} seconds.`;
-            dialogElement.open = true;
-            if (localStorage.getItem("name") != "") { 
-                nameElement.value = localStorage.getItem("name");
-                nameElement.disabled = true; 
-            }
-            typedValueElement.disabled = true;
-            typedValueElement.removeEventListener("input", handleTyping);
-            document.getElementById("submit").addEventListener("click", () => {
-                localStorage.setItem("name", nameElement.value);
-                submitScore(elapsedTime);
-                dialogElement.open = false;
-            });
+            endGame();
         } else if (typedValue.endsWith(" ") && typedValue.trim() === currentWord) {
+            // highlight next word
             typedValueElement.value = "";
             wordIndex++;
-            for (const wordElement of quoteElement.childNodes) {
-                wordElement.className = "";
-            }
+            quoteElement.childNodes[wordIndex-1].className = "";
             quoteElement.childNodes[wordIndex].className = "highlight";
         } else if (currentWord.startsWith(typedValue)) {
+            // don't do anything if typed correctly so far
             typedValueElement.className = "";
         } else {
+            // highlight error if typed wrongly
             typedValueElement.className = "error";
         }
     }
 
-    async function submitScore(time) {
-        let name = localStorage.getItem("name");
-        let wpm = num / (time / 60);
-        const res = await fetch(`https://${workersDomain}/score`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json"},
-            body: JSON.stringify({ name, wpm, time })
+    function endGame() {
+        // get elapsed time in seconds
+        const elapsedTime = (new Date().getTime() - startTime) / 1000;
+
+        // disable type input until new game
+        typedValueElement.disabled = true;
+        typedValueElement.removeEventListener("input", handleType);
+
+        // score submission
+        dialogElement.open = true;
+        document.getElementById("success").innerText = `Congratulations! You finished in ${elapsedTime} seconds.`;
+        nameElement.value = localStorage.getItem("name");
+        document.getElementById("submit").addEventListener("click", () => {
+            localStorage.setItem("name", nameElement.value);
+            submitScore();
+            dialogElement.open = false;
         });
-        if (!res.ok) throw new Error("Score submit failed");
+
+
+
+        async function submitScore() {
+            let name = localStorage.getItem("name");
+            let wpm = numWords / (elapsedTime / 60);
+            const result = await fetch(`https://${workersDomain}/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json"},
+                body: JSON.stringify({ name, wpm, elapsedTime })
+            });
+            if (!result.ok) throw new Error("Score submit failed");
+
+            loadLeaderboard();
+        }
+    }
+}
+
+async function readTextfile(url) {
+    const result = await fetch(url);
+    if (!result.ok) throw new Error(`Failed to fetch ${url}: ${result.status}`);
+
+    const text = await result.text();
+    return text.split(/\r?\n/);
+}
+
+async function loadLeaderboard() {
+    const result = await fetch(`https://${workersDomain}/leaderboard?limit=5`);
+    if (!result.ok) throw new Error("Failed to load leaderboard");
+    const scores = await result.json();
+
+    renderLeaderboard(scores);
+}
+
+function renderLeaderboard(scores) {
+    const ol = document.getElementById("leaderboard");
+    ol.innerHTML = "";
+
+    for (const s of scores) {
+        const li = document.createElement("li");
+        li.textContent = `${s.name} | WPM: ${s.wpm} | Time: ${s.time}`;
+        ol.appendChild(li);
     }
 }
 
