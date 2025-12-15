@@ -126,7 +126,7 @@ function renderLeaderboard(scores) {
 
     for (const s of scores) {
         const li = document.createElement("li");
-        li.textContent = `${s.name} | WPM: ${s.wpm} | Time: ${s.elapsedTime}`;
+        li.textContent = `${s.name} | WPM: ${s.wpm.toFixed(2)} | Time: ${s.elapsedTime.toFixed(2)}`;
         ol.appendChild(li);
     }
 }
