@@ -8,7 +8,7 @@ async function readQuotes(url) {
 
 async function init() {
     const workersDomain = "typing-game-leaderboard-worker.raywangruihua.workers.dev";
-    const quotes = await readQuotes("./text/minecraft-end-poem.txt");
+    const quotes = await readQuotes("./text/quotes/minecraft-end-poem.txt");
     let words = [];
     let num;
     let wordIndex = 0;
@@ -71,7 +71,10 @@ async function init() {
             const elapsedTime = (new Date().getTime() - startTime) / 1000;
             document.getElementById("success").innerText = `CONGRATULATIONS! You finished in ${elapsedTime} seconds.`;
             dialogElement.open = true;
-            if (localStorage.getItem("name") != "") { nameElement.disabled = true; }
+            if (localStorage.getItem("name") != "") { 
+                nameElement.value = localStorage.getItem("name");
+                nameElement.disabled = true; 
+            }
             typedValueElement.disabled = true;
             typedValueElement.removeEventListener("input", handleTyping);
             document.getElementById("submit").addEventListener("click", () => {

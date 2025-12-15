@@ -68,6 +68,17 @@ input, textarea, button, select {
     z-index: 1;
 }
 
+#leaderboard-holder {
+    background-image: url("images/stone-background.jpg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
 /* Keyframes */
 @keyframes pop {
     from {
